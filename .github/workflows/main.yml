@@ -1,25 +1,24 @@
+name: CI
+
 on: [push]
 
 jobs:
-  Test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        use-bootstrap: [false, true]
-        fpm-version: ['v0.1.0','v0.1.1','latest']
+  build:
+
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: fpm-setup
-        uses: ./ # Uses action in the root directory
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fpm-version: ${{ matrix.fpm-version }}
-          use-haskell: ${{ matrix.use-bootstrap }}
-
-      - name: test fpm
-        run: fpm --help
+    - uses: actions/checkout@v1
+    - name: Install gfortran
+      run: |
+         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+         sudo apt update
+         sudo apt-get install gfortran-9
+    - name: Show gfortran version
+      run: gfortran-9 --version
+    - name: Build
+      run: make FC=gfortran-9
+    - name: List files
+      run: ls
+    - name: Run
+      run: ./test.exe
